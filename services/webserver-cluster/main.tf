@@ -97,6 +97,17 @@ resource "aws_security_group_rule" "allow_http_alb_inbound" {
   ipv6_cidr_blocks = local.all_ips_v6
 }
 
+resource "aws_security_group_rule" "allow_all_alb_outbound" {
+  type              = "egress"
+  security_group_id = aws_security_group.alb.id
+
+  from_port        = local.any_port
+  to_port          = local.any_port
+  protocol         = local.any_protocol
+  cidr_blocks      = local.all_ips
+  ipv6_cidr_blocks = local.all_ips_v6
+}
+
 resource "aws_lb" "example" {
   name               = var.cluster_name
   load_balancer_type = "application"
