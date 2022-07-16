@@ -49,16 +49,6 @@ variable "cluster_name" {
   type        = string
 }
 
-variable "db_remote_state_bucket" {
-  description = "The name of the S3 bucket for the database's remote state"
-  type        = string
-}
-
-variable "db_remote_state_key" {
-  description = "The path for the databases's remote state in S3"
-  type        = string
-}
-
 variable "instance_type" {
   description = "The type of EC2 Instance to run"
   type        = string

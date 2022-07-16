@@ -45,13 +45,13 @@ resource "aws_autoscaling_group" "example" {
   }
 }
 
-resource "aws_security_group" "alb" {
-  name = "${var.cluster_name}-alb"
+resource "aws_security_group" "instance" {
+  name = "${var.cluster_name}-instance"
 }
 
-resource "aws_security_group_rule" "allow_http_inbound" {
+resource "aws_security_group_rule" "allow_http_instance_inbound" {
   type              = "ingress"
-  security_group_id = aws_security_group.alb.id
+  security_group_id = aws_security_group.instance.id
 
   from_port        = local.http_port
   to_port          = local.http_port
@@ -60,9 +60,9 @@ resource "aws_security_group_rule" "allow_http_inbound" {
   ipv6_cidr_blocks = local.all_ips_v6
 }
 
-resource "aws_security_group_rule" "allow_ssh_inbound" {
+resource "aws_security_group_rule" "allow_ssh_instance_inbound" {
   type              = "ingress"
-  security_group_id = aws_security_group.alb.id
+  security_group_id = aws_security_group.instance.id
 
   from_port        = local.ssh_port
   to_port          = local.ssh_port
@@ -71,13 +71,28 @@ resource "aws_security_group_rule" "allow_ssh_inbound" {
   ipv6_cidr_blocks = local.all_ips_v6
 }
 
-resource "aws_security_group_rule" "allow_all_outbound" {
+resource "aws_security_group_rule" "allow_all_instance_outbound" {
   type              = "egress"
-  security_group_id = aws_security_group.alb.id
+  security_group_id = aws_security_group.instance.id
 
   from_port        = local.any_port
   to_port          = local.any_port
   protocol         = local.any_protocol
+  cidr_blocks      = local.all_ips
+  ipv6_cidr_blocks = local.all_ips_v6
+}
+
+resource "aws_security_group" "alb" {
+  name = "${var.cluster_name}-alb"
+}
+
+resource "aws_security_group_rule" "allow_http_alb_inbound" {
+  type              = "ingress"
+  security_group_id = aws_security_group.alb.id
+
+  from_port        = local.http_port
+  to_port          = local.http_port
+  protocol         = local.tcp_protocol
   cidr_blocks      = local.all_ips
   ipv6_cidr_blocks = local.all_ips_v6
 }
@@ -139,35 +154,7 @@ resource "aws_lb_listener_rule" "asg" {
   }
 }
 
-resource "aws_security_group" "alb" {
-  name = "${var.cluster_name}-alb"
 
-  ingress {
-    description      = "SSH from VPC"
-    from_port        = local.ssh_port
-    to_port          = local.ssh_port
-    protocol         = local.any_protocol
-    cidr_blocks      = local.all_ips
-    ipv6_cidr_blocks = local.all_ips_v6
-  }
-
-  ingress {
-    from_port        = var.server_port
-    to_port          = var.server_port
-    protocol         = local.any_protocol
-    cidr_blocks      = local.all_ips
-    ipv6_cidr_blocks = local.all_ips_v6
-
-  }
-
-  egress {
-    from_port        = local.any_port
-    to_port          = local.any_port
-    protocol         = local.any_protocol
-    cidr_blocks      = local.all_ips
-    ipv6_cidr_blocks = local.all_ips_v6
-  }
-}
 
 data "terraform_remote_state" "db" {
   backend = "s3"
