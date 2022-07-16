@@ -6,7 +6,7 @@
 variable "db_remote_state_bucket" {
   description = "The name of the S3 bucket used for the database's remote state storage"
   type        = string
-  default     = "tf-ldeng-ch3-bucket-1"
+  default     = "tf-ldeng-ch4-bucket-1"
 }
 
 variable "db_remote_state_key" {
